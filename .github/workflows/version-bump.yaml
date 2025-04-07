@@ -1,0 +1,42 @@
+name: Version Bump
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - prod
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Bump version
+        run: |
+          npm install -g semver
+          current_version=$(node -p "require('./package.json').version")
+          
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            new_version=$(semver -i patch $current_version)
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            new_version=$(semver -i prerelease $current_version)
+          elif [[ "${{ github.ref }}" == "refs/heads/prod" ]]; then
+            new_version=$(semver -i major $current_version)
+          fi
+          
+          npm version $new_version --no-git-tag-version
+      
+      - name: Commit and push version bump
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add package.json
+          git commit -m "Bump version to $new_version"
+          git push

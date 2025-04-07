@@ -1,0 +1,38 @@
+{
+  "name": "games-event-data-feed-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "npx eslint ./src/**",
+    "lint:fix": "npx eslint ./src/** --fix",
+    "db:migrate": "tsx src/database/migration.ts",
+    "start": "tsx watch src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.7.0",
+  "dependencies": {
+    "@types/pg": "^8.11.11",
+    "axios": "^1.6.8",
+    "cheerio": "^1.0.0-rc.12",
+    "date-fns": "^4.1.0",
+    "express": "^4.21.2",
+    "glob": "^11.0.1",
+    "pg": "^8.14.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@types/axios": "^0.14.0",
+    "@types/cheerio": "^0.22.35",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.13.14",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.28.0"
+  }
+}
