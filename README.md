@@ -33,8 +33,8 @@ The database is a PostgreSQL database.
 
 ## Used Versions
 
-- Node.js: 22.10.0
-- Pnpm: 10.7.0
+- Python: 3.13.5
+- Pip: 25.1.1
 
 ## Application Version
 
