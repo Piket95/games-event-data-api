@@ -1,6 +1,6 @@
 # Games Event Data Feed API
 
-This is a Node.js API that fetches event data from Honkai: Star Rail and stores it in a PostgreSQL database.
+This is a Python Flask API that fetches event data from Wuthering Waves and stores it in a SQLite database.
 
 ## Setup
 
