@@ -1,11 +1,9 @@
 import wuwa_codes
-import database.database as db
-
-def codesScraping():
-    db.migrate()
-    wuwa_codes.scrapeCodes()
-    return
-
+import database.database as db  
+from dotenv import load_dotenv
 
 if __name__ == "__main__":
-    codesScraping()
+    load_dotenv()
+    
+    db.migrate()
+    wuwa_codes.scrapeCodes()

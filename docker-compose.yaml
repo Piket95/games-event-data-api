@@ -1,0 +1,7 @@
+services:
+  mqtt:
+    image: eclipse-mosquitto
+    ports:
+      - 127.0.0.1:1883:1883
+      - 127.0.0.1:9001:9001
+    command: mosquitto -c /mosquitto-no-auth.conf
