@@ -147,7 +147,7 @@ def broadcast_new_code_signal(updates):
     """
 
     if not mqtt.test_connection():
-        Log().error('MQTT connection test failed. Is the server down? Aborting broadcast...')
+        Log().error('Could not connect to MQTT broker. Is the server down? Aborting broadcast...')
         return
 
     try:

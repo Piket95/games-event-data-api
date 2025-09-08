@@ -30,10 +30,9 @@ def test_connection() -> bool:
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
-
-    connected = False
     
     try:
+        connected = False
         Log()("🔄 Attempting to connect to MQTT broker...")
         client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')), 60)
         
@@ -45,25 +44,21 @@ def test_connection() -> bool:
         for i in range(50):  # 50 * 0.1s = 5s
             if client.is_connected():
                 Log()("✅ Client reports as connected!")
+                connected = True
                 break
             time.sleep(0.1)
-
-            connected = True
         else:
             Log()("❌ Connection timeout - broker not responding")
         
         # Clean up
         client.loop_stop()
 
-        connected = True
-        
+        return connected
     except Exception as e:
-        Log().error(f"❌ Exception: {e}")
+        return False
     finally:
         client.disconnect()
-        Log()("Test completed")
-    
-    return connected
+        # Log()("Test completed")
 
 def listen_for_code_updates():
     """
