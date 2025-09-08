@@ -50,7 +50,7 @@ if __name__ == "__main__":
         Log()(f'Running all found tests...')
 
         for file in files:
-            Log()(f"\n--- Führe Datei aus: {os.path.relpath(file, os.path.dirname(__file__))} ---")
+            print(f"\n--- Führe Datei aus: {os.path.relpath(file, os.path.dirname(__file__))} ---")
             
             # Lade das Modul
             spec = importlib.util.spec_from_file_location("module.name", file)

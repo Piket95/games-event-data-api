@@ -146,6 +146,10 @@ def broadcastNewCodeSignal(updates):
     Broadcast all new or updated codes to the MQTT broker.
     """
 
+    if not mqtt.test_connection():
+        Log().error('MQTT connection test failed. Is the server down? Aborting broadcast...')
+        return
+
     try:
         mqtt.broadcast_new_code(updates, Game.WUTHERING_WAVES.value)
     except Exception as e:
