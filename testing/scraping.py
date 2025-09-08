@@ -27,7 +27,7 @@ def scraping_wuwa_codes() -> List[int]:
     # TODO: setup mqtt listener and check if the codes where broadcasted correctly
     test_results = [0,0]
 
-    wuwa_codes.scrapeCodes()
+    wuwa_codes.scrape_codes()
 
     # check if all entries are correctly in db
     conn, cursor = database.connect()

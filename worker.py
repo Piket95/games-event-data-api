@@ -6,4 +6,4 @@ if __name__ == "__main__":
     load_dotenv()
     
     db.migrate()
-    wuwa_codes.scrapeCodes()
+    wuwa_codes.scrape_codes()

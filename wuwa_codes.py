@@ -8,14 +8,14 @@ from helpers.games import Game
 from config.environments import Environment
 from helpers.log import Log
 
-def getHTMLdocument(url):
+def get_html_document(url):
     """
     Get the HTML document from the given URL.
     """
     response = requests.get(url)
     return response.text
 
-def scrapeCodes():
+def scrape_codes():
     """
     Scrape the WuWa codes from the website.
     """
@@ -28,7 +28,7 @@ def scrapeCodes():
             html_document = f.read()
     else:
         url_to_scrape = "https://www.gamesradar.com/games/rpg/wuthering-waves-codes-redeem/"
-        html_document = getHTMLdocument(url_to_scrape)
+        html_document = get_html_document(url_to_scrape)
 
     soup = BeautifulSoup(html_document, 'html.parser')
 
@@ -74,11 +74,11 @@ def scrapeCodes():
 
     Log()('Finished scraping WuWa codes.')
 
-    saveCodes(result)
+    save_codes(result)
 
     return result
 
-def saveCodes(codes):
+def save_codes(codes):
     """
     Save the scraped codes to the database.
     """
@@ -135,13 +135,13 @@ def saveCodes(codes):
     if len(updates) > 0:
         Log()('WuWa codes saved to database.')
         Log()('Broadcasting new codes...')
-        broadcastNewCodeSignal(updates)
+        broadcast_new_code_signal(updates)
     else:
         Log()('No new WuWa codes found.')
 
     conn.close()
 
-def broadcastNewCodeSignal(updates):
+def broadcast_new_code_signal(updates):
     """
     Broadcast all new or updated codes to the MQTT broker.
     """
