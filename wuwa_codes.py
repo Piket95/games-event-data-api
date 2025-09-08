@@ -1,9 +1,11 @@
 from bs4 import BeautifulSoup
 import requests
 import mqtt
+import os
 
 import database.database as db
-from games import Game
+from helpers.games import Game
+from config.environments import Environment
 
 def getHTMLdocument(url):
     """
@@ -18,11 +20,14 @@ def scrapeCodes():
     """
 
     print('Scraping WuWa codes...')
-    
-    # url_to_scrape = "https://www.gamesradar.com/games/rpg/wuthering-waves-codes-redeem/"
-    # html_document = getHTMLdocument(url_to_scrape)
-    with open('./website-sources/wuwa-codes.html', 'r', encoding='utf-8') as f:
-        html_document = f.read()
+
+    if (os.getenv('ENVIRONMENT') == Environment.TESTING.value):
+        url_to_scrape = "./website-sources/wuwa-codes.html"
+        with open(url_to_scrape, 'r', encoding='utf-8') as f:
+            html_document = f.read()
+    else:
+        url_to_scrape = "https://www.gamesradar.com/games/rpg/wuthering-waves-codes-redeem/"
+        html_document = getHTMLdocument(url_to_scrape)
 
     soup = BeautifulSoup(html_document, 'html.parser')
 
@@ -66,30 +71,11 @@ def scrapeCodes():
         'expired_codes': expired_codes,
     }
 
-    # result = useTestCodes()
-
     print('Finished scraping WuWa codes.')
 
     saveCodes(result)
 
     return result
-
-def useTestCodes():
-    return {
-        "active_codes": {
-            "WUTHERINGGIFT": "50 Astrite, two Premium Resonance Potion, two Medium Revival Inhaler, two Medium Energy Bag, 10,000 Shell Credit",
-            "SHOREKEEPER": "100 Astrite",
-        },
-        "expired_codes": {
-            "WUTHERINGWAVESGIFT": "",
-            "WUTHERING2024": "",
-            "BAHAMUTKXMHM": "Five Medium Resonance Potion, five Medium Energy Core, 50,000 Shell Credit",
-            "DCARD3VN7M": "Five Medium Resonance Potion, five Medium Energy Core, 50,000 Shell Credit",
-            "PTTMYZSOM": "Five Medium Resonance Potion, five Medium Energy Core, 50,000 Shell Credit",
-            "BLACKSHORES": "100 Astrite",
-            "FORYOU": "100 Astrite",
-        },
-    }
 
 def saveCodes(codes):
     """
@@ -159,5 +145,8 @@ def broadcastNewCodeSignal(updates):
     Broadcast all new or updated codes to the MQTT broker.
     """
 
-    mqtt.broadcast_new_code(updates, Game.WUTHERING_WAVES.value)
+    try:
+        mqtt.broadcast_new_code(updates, Game.WUTHERING_WAVES.value)
+    except Exception as e:
+        print(f'\033[91mError broadcasting new codes: {e}\033[0m')
 

@@ -1,20 +1,34 @@
 import sqlite3
 import os
 
+from config.environments import Environment
+from dotenv import load_dotenv
+
 def connect():
     """
     Connect to the database.
     """
-    conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), 'dev.sqlite'))
+
+    db_filename = 'dev.sqlite'
+
+    if (os.getenv('ENVIRONMENT') == Environment.TESTING.value):
+        db_filename = 'testing.sqlite'
+
+    conn = sqlite3.connect(os.path.join(os.path.dirname(__file__), db_filename))
     cursor = conn.cursor()
     return conn, cursor
 
 def migrate():
+
+    load_dotenv()
+
     """
     Migrate the database.
     """
     print('Migrate database...')
     conn, cursor = connect()
+
+    drop_all_tables(conn, cursor)
 
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS codes (
@@ -29,3 +43,18 @@ def migrate():
     ''')
     conn.commit()
     conn.close()
+
+def drop_all_tables(conn, cursor):
+    """
+    Drop all tables.
+    """
+    print('Drop all tables...')
+
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = cursor.fetchall()
+    for table_name in tables:
+        if table_name[0] != 'sqlite_sequence':
+            cursor.execute('''
+                DROP TABLE IF EXISTS {}
+            '''.format(table_name[0]))
+    conn.commit()

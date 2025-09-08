@@ -3,7 +3,7 @@ import time
 import json
 import os
 
-from games import Game
+from helpers.games import Game
 
 def on_connect(client, userdata, flags, reason_code, properties):
     """
@@ -113,4 +113,5 @@ if __name__ == "__main__":
     elif args.send_test_code:
         broadcast_new_code("DEVTESTCODE", Game.WUTHERING_WAVES.value)
     else:
-        print('Raw execution prohibited...')    
+        print('Raw execution prohibited...')
+        parser.print_help()
