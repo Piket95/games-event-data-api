@@ -23,10 +23,12 @@ def scrape_codes():
     Log()('Scraping WuWa codes...')
 
     if (os.getenv('ENVIRONMENT') == Environment.TESTING.value):
+        Log()('Reading test file...')
         url_to_scrape = "./website-sources/wuwa-codes.html"
         with open(url_to_scrape, 'r', encoding='utf-8') as f:
             html_document = f.read()
     else:
+        Log()('Scraping website...')
         url_to_scrape = "https://www.gamesradar.com/games/rpg/wuthering-waves-codes-redeem/"
         html_document = get_html_document(url_to_scrape)
 
@@ -83,6 +85,8 @@ def save_codes(codes):
     Save the scraped codes to the database.
     """
 
+    # TODO maybe rename to prepare codes and transfer the actual saving into database.py
+
     Log()('Saving WuWa codes to database...')
     
     conn, cursor = db.connect()
@@ -99,10 +103,13 @@ def save_codes(codes):
         expired = type == 'expired_codes'
 
         for code, description in inner_codes.items():
+            # if the code is already in the database
             if code in existing_codes:
-
+                # loop through the entries
                 for entry in entries:
+                    # and get the exact entry of the existing code with all its values
                     if entry[1] == code:
+                        # if the expired state of the code has changed, update it
                         if expired != entry[4]:
                             Log()('Updating code: [' + Game.WUTHERING_WAVES.value + '] ' + code + ' to ' + ('expired' if expired else 'active'))
 
@@ -111,11 +118,13 @@ def save_codes(codes):
                             ''', (expired, code, Game.WUTHERING_WAVES.value))
                             conn.commit()
 
-                            code_update = dict()
-                            code_update['description'] = description
-                            code_update['state'] = 'expired' if expired else 'active'
+                            # add only the active codes to the updated list to broadcast them
+                            if not expired:
+                                code_update = dict()
+                                code_update['description'] = description
+                                code_update['state'] = 'expired' if expired else 'active'
 
-                            updates[code] = code_update
+                                updates[code] = code_update
 
                 continue
             
@@ -125,12 +134,12 @@ def save_codes(codes):
             ''', (code, description, Game.WUTHERING_WAVES.value, expired))
             conn.commit()
 
-            new_code = dict()
-            new_code['description'] = description
-            new_code['state'] = 'new'
-            updates[code] = new_code
-    
-    # print(updates)
+            # add only the active codes to the updated list to broadcast them
+            if not expired:
+                new_code = dict()
+                new_code['description'] = description
+                new_code['state'] = 'expired' if expired else 'active'
+                updates[code] = new_code
 
     if len(updates) > 0:
         Log()('WuWa codes saved to database.')
@@ -145,13 +154,6 @@ def broadcast_new_code_signal(updates):
     """
     Broadcast all new or updated codes to the MQTT broker.
     """
-
-    if not mqtt.test_connection():
-        Log().error('Could not connect to MQTT broker. Is the server down? Aborting broadcast...')
-        return
-
-    try:
-        mqtt.broadcast_new_code(updates, Game.WUTHERING_WAVES.value)
-    except Exception as e:
-        Log().error(f'Error broadcasting new codes: {e}')
+    
+    mqtt.broadcast_new_code(updates, Game.WUTHERING_WAVES.value)
 

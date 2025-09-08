@@ -42,6 +42,7 @@ The migration of the database is be done automatically on worker execution!
 - 0.0.3
 
 ## TODO's
+[ ] Make a Dockerfile to containerize the application and simplify the setup process
 [ ] Make connection to mqtt broker reliable
 [ ] Should i put the codes in a queue and send them out, if the mqtt broker isn't available and send them when it is available again?
 [ ] Should i make a single callable main.py file that starts the api and runs the worker in specific intervalls?

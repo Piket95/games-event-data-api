@@ -5,6 +5,7 @@ import os
 
 from helpers.games import Game
 from helpers.log import Log
+import database.database as db
 
 def on_connect(client, userdata, flags, reason_code, properties):
     """
@@ -89,10 +90,17 @@ def broadcast_new_code(codes, game):
     Broadcast a new code to the MQTT broker.
     """
 
+    # test the connection to the broker to get a notification at the terminal if the connection fails on worst case, so the hoster is informed at least
+    if not test_connection():
+        Log().error('Could not connect to MQTT broker. Is the server down? Aborting broadcast...')
+        return
+
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
     client.publish("gamecodes/" + game, json.dumps(codes))
     client.disconnect()
+    
+    db.set_code_broadcasted(codes, game)
 
 # for testing and documentation purposes only. Not meant to be used in production
 if __name__ == "__main__":

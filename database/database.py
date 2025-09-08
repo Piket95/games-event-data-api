@@ -38,7 +38,8 @@ def migrate():
             code TEXT NOT NULL,
             description TEXT,
             game TEXT NOT NULL,
-            expired BOOLEAN NOT NULL,
+            expired BOOLEAN NOT NULL DEFAULT FALSE,
+            broadcasted BOOLEAN NOT NULL DEFAULT FALSE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -61,5 +62,31 @@ def drop_all_tables(silent=False):
             cursor.execute('''
                 DROP TABLE IF EXISTS {}
             '''.format(table_name[0]))
+    conn.commit()
+    conn.close()
+
+def check_table_codes_existing():
+    """
+    Check if the table "codes" exists.
+    """
+    conn, cursor = connect()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='codes';")
+    table_codes = cursor.fetchone()
+    conn.close()
+
+    return table_codes is not None
+
+def set_code_broadcasted(codes, game):
+    """
+    Set the code broadcasted to True.
+    """
+
+    conn, cursor = connect()
+    placeholders = ', '.join(['?'] * len(codes))
+    cursor.execute(f'''
+        UPDATE codes SET broadcasted = ?
+        WHERE code IN ({placeholders})
+        AND game = ?
+    ''', (True, *codes, game))
     conn.commit()
     conn.close()
