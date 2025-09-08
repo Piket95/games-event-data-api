@@ -4,28 +4,29 @@ import json
 import os
 
 from helpers.games import Game
+from helpers.log import Log
 
 def on_connect(client, userdata, flags, reason_code, properties):
     """
     Callback function for when the client successfully connects to the MQTT broker.
     """
-    print(f"🔵 on_connect called with reason_code: {reason_code}")
+    Log()(f"🔵 on_connect called with reason_code: {reason_code}")
     if reason_code == 0:
-        print("✅ Successfully connected to MQTT broker")
+        Log()("✅ Successfully connected to MQTT broker")
     else:
-        print(f"❌ Connection failed with code: {reason_code}")
+        Log()(f"❌ Connection failed with code: {reason_code}")
 
 def on_disconnect(client, userdata, flags, reason_code, properties):
     """
     Callback function for when the client disconnects from the MQTT broker.
     """
-    print(f"🟠 on_disconnect called with reason_code: {reason_code}")
+    Log()(f"🟠 on_disconnect called with reason_code: {reason_code}")
 
-def test_connection():
+def test_connection() -> bool:
     """
     Test the connection to the MQTT broker.
     """
-    print("Starting MQTT connection test...")
+    Log()("Starting MQTT connection test...")
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
     client.on_disconnect = on_disconnect
@@ -33,34 +34,36 @@ def test_connection():
     connected = False
     
     try:
-        print("🔄 Attempting to connect to MQTT broker...")
+        Log()("🔄 Attempting to connect to MQTT broker...")
         client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')), 60)
         
         # Start network loop
         client.loop_start()
         
         # Wait for connection
-        print("⏳ Waiting for connection... (max 5 seconds)")
+        Log()("⏳ Waiting for connection... (max 5 seconds)")
         for i in range(50):  # 50 * 0.1s = 5s
             if client.is_connected():
-                print("✅ Client reports as connected!")
+                Log()("✅ Client reports as connected!")
                 break
             time.sleep(0.1)
 
             connected = True
         else:
-            print("❌ Connection timeout - broker not responding")
+            Log()("❌ Connection timeout - broker not responding")
         
         # Clean up
         client.loop_stop()
 
-        return connected
+        connected = True
         
     except Exception as e:
-        print(f"❌ Exception: {e}")
+        Log().error(f"❌ Exception: {e}")
     finally:
         client.disconnect()
-        print("Test completed")
+        Log()("Test completed")
+    
+    return connected
 
 def listen_for_code_updates():
     """
@@ -68,7 +71,7 @@ def listen_for_code_updates():
     """
     def on_message(client, userdata, msg):
         current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        print(f"[{current_time}] - Received message on topic {msg.topic}: {msg.payload.decode()}")
+        Log()(f"[{current_time}] - Received message on topic {msg.topic}: {msg.payload.decode()}")
     
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
     client.on_connect = on_connect
@@ -77,12 +80,12 @@ def listen_for_code_updates():
     try:
         client.connect(os.getenv('MQTT_BROKER'), int(os.getenv('MQTT_PORT')))
         client.subscribe("gamecodes/#")
-        print("Listening for messages on topic 'gamecodes/#'. Press Ctrl+C to exit...")
+        Log()("Listening for messages on topic 'gamecodes/#'. Press Ctrl+C to exit...")
         client.loop_forever()
     except KeyboardInterrupt:
-        print("Stopping listener...")
+        Log()("Stopping listener...")
     except Exception as e:
-        print(f"Error: {e}")
+        Log().error(f"Error: {e}")
     finally:
         client.disconnect()
 
@@ -113,5 +116,5 @@ if __name__ == "__main__":
     elif args.send_test_code:
         broadcast_new_code("DEVTESTCODE", Game.WUTHERING_WAVES.value)
     else:
-        print('Raw execution prohibited...')
+        print('\033[91mRaw execution prohibited...\033[0m')
         parser.print_help()
