@@ -2,8 +2,11 @@
 import sys
 import os
 import importlib.util
+
 from dotenv import load_dotenv
+
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from config.environments import Environment
 from helpers.log import Log
 
@@ -58,8 +61,12 @@ if __name__ == "__main__":
 
             # Überprüfe, ob eine run-Funktion existiert
             if hasattr(module, 'run') and callable(module.run):
-                module.run()  # Führe die run-Funktion aus
-                Log().success(f"Erfolgreich ausgeführt: {os.path.basename(file)}")
+                results = module.run()  # Führe die run-Funktion aus
+                
+                if results[1] > 0:
+                    Log().error(f"{results[1]} Tests fehlgeschlagen und {results[0]} Tests erfolgreich ausgeführt in {os.path.basename(file)}")
+                else:
+                    Log().success(f"{results[0]} Tests erfolgreich ausgeführt in {os.path.basename(file)}")
             else:
                 Log().error(f"Keine run()-Funktion in {os.path.relpath(file, os.path.dirname(__file__))} gefunden.")
         

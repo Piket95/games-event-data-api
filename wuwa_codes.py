@@ -6,6 +6,7 @@ import os
 import database.database as db
 from helpers.games import Game
 from config.environments import Environment
+from helpers.log import Log
 
 def getHTMLdocument(url):
     """
@@ -19,7 +20,7 @@ def scrapeCodes():
     Scrape the WuWa codes from the website.
     """
 
-    print('Scraping WuWa codes...')
+    Log()('Scraping WuWa codes...')
 
     if (os.getenv('ENVIRONMENT') == Environment.TESTING.value):
         url_to_scrape = "./website-sources/wuwa-codes.html"
@@ -71,7 +72,7 @@ def scrapeCodes():
         'expired_codes': expired_codes,
     }
 
-    print('Finished scraping WuWa codes.')
+    Log()('Finished scraping WuWa codes.')
 
     saveCodes(result)
 
@@ -82,7 +83,7 @@ def saveCodes(codes):
     Save the scraped codes to the database.
     """
 
-    print('Saving WuWa codes to database...')
+    Log()('Saving WuWa codes to database...')
     
     conn, cursor = db.connect()
 
@@ -103,7 +104,7 @@ def saveCodes(codes):
                 for entry in entries:
                     if entry[1] == code:
                         if expired != entry[4]:
-                            print('Updating code: [' + Game.WUTHERING_WAVES.value + '] ' + code + ' to ' + ('expired' if expired else 'active'))
+                            Log()('Updating code: [' + Game.WUTHERING_WAVES.value + '] ' + code + ' to ' + ('expired' if expired else 'active'))
 
                             cursor.execute('''
                                 UPDATE codes SET expired = ? WHERE code = ? AND game = ?
@@ -132,11 +133,11 @@ def saveCodes(codes):
     # print(updates)
 
     if len(updates) > 0:
-        print('WuWa codes saved to database.')
-        print('Broadcasting new codes...')
+        Log()('WuWa codes saved to database.')
+        Log()('Broadcasting new codes...')
         broadcastNewCodeSignal(updates)
     else:
-        print('No new WuWa codes found.')
+        Log()('No new WuWa codes found.')
 
     conn.close()
 
@@ -148,5 +149,5 @@ def broadcastNewCodeSignal(updates):
     try:
         mqtt.broadcast_new_code(updates, Game.WUTHERING_WAVES.value)
     except Exception as e:
-        print(f'\033[91mError broadcasting new codes: {e}\033[0m')
+        Log().error(f'Error broadcasting new codes: {e}')
 

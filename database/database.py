@@ -1,8 +1,10 @@
 import sqlite3
 import os
 
-from config.environments import Environment
 from dotenv import load_dotenv
+
+from config.environments import Environment
+from helpers.log import Log
 
 def connect():
     """
@@ -25,11 +27,11 @@ def migrate():
     """
     Migrate the database.
     """
-    print('Migrate database...')
+    Log()('Migrating database...')
+
+    drop_all_tables()
+
     conn, cursor = connect()
-
-    drop_all_tables(conn, cursor)
-
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS codes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,12 +46,14 @@ def migrate():
     conn.commit()
     conn.close()
 
-def drop_all_tables(conn, cursor):
+def drop_all_tables(silent=False):
     """
     Drop all tables.
     """
-    print('Drop all tables...')
+    if not silent:
+        Log()('Dropping all tables...')
 
+    conn, cursor = connect()
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     tables = cursor.fetchall()
     for table_name in tables:
@@ -58,3 +62,4 @@ def drop_all_tables(conn, cursor):
                 DROP TABLE IF EXISTS {}
             '''.format(table_name[0]))
     conn.commit()
+    conn.close()
