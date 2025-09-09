@@ -1,5 +1,4 @@
 beautifulsoup4==4.13.4
 requests==2.32.4
-sqlite3==3.42.0
 paho-mqtt==2.1.0
 dotenv==0.9.9
