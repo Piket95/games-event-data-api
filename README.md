@@ -11,10 +11,10 @@ This is a Python Flask API that fetches event data from Wuthering Waves and stor
 
 3. Run the Data scraper:
    ```
-   python worker.py
+   python main.py
    ```
 
-3. Run the API:
+3. Run the API: (not implemented yet)
    ```
    python api.py
    ```
@@ -26,7 +26,7 @@ The API uses a scheduled task to fetch event data from diverse web sources and s
 ## Database
 
 The database is a SQLite database (for now).
-The migration of the database is be done automatically on worker execution!
+The migration of the database is be done automatically on execution!
 
 ## API Endpoints (not implemented anymore (will be in future again))
 
