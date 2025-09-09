@@ -14,7 +14,7 @@ def run() -> List[int]:
     test_results = [0,0]
 
     database.migrate()
-    results = scraping_wuwa_codes()
+    results = test_scraping_wuwa_codes()
     test_results[0] += results[0]
     test_results[1] += results[1]
 
@@ -22,7 +22,7 @@ def run() -> List[int]:
 
     return test_results
 
-def scraping_wuwa_codes() -> List[int]:
+def test_scraping_wuwa_codes() -> List[int]:
 
     # TODO: setup mqtt listener and check if the codes where broadcasted correctly
     test_results = [0,0]
