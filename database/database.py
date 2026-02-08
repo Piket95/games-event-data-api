@@ -44,6 +44,18 @@ def migrate():
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            start_time TIMESTAMP NOT NULL,
+            end_time TIMESTAMP NOT NULL,
+            game TEXT NOT NULL,
+            broadcasted BOOLEAN NOT NULL DEFAULT FALSE,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     conn.commit()
     conn.close()
 
@@ -65,12 +77,12 @@ def drop_all_tables(silent=False):
     conn.commit()
     conn.close()
 
-def check_table_codes_existing():
+def check_table_exists(table_name):
     """
-    Check if the table "codes" exists.
+    Check if the table exists.
     """
     conn, cursor = connect()
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='codes';")
+    cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}';")
     table_codes = cursor.fetchone()
     conn.close()
 

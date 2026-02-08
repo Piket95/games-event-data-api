@@ -3,7 +3,7 @@ import time
 
 from dotenv import load_dotenv
 
-import wuwa_codes
+import games.wuwa.codes as wuwa_codes
 import database.database as db
 from helpers.time_delay import calculate_delay
 from helpers.log import Log
@@ -17,7 +17,7 @@ def run_scrapers():
 if __name__ == "__main__":
     load_dotenv()
     
-    if not db.check_table_codes_existing():
+    if not db.check_table_exists('codes'):
         db.migrate()
 
     start_api()
