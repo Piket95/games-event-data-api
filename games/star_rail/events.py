@@ -12,12 +12,12 @@ from helpers.log import Log
 
 def scrape_events():
     """
-    Scrape the WuWa events from the website.
+    Scrape the Star Rail events from the website.
     """
 
-    Log()('Scraping WuWa events...')
+    Log()('Scraping Star Rail events...')
     Log()('Scraping website...')
-    url_to_scrape = "https://game8.co/games/Wuthering-Waves/archives/453473"
+    url_to_scrape = "https://game8.co/games/Honkai-Star-Rail/archives/408749"
 
     response = requests.get(url_to_scrape)
     soup = BeautifulSoup(response.text, 'html.parser')
@@ -36,16 +36,15 @@ def scrape_events():
         if len(cells) >= 2:
             # First column: event name and link
             first_cell = cells[0]
-            event_link = first_cell.find('a')
-            event_name = event_link.get_text(strip=True) if event_link else first_cell.get_text(strip=True)
-            event_url = event_link.get('href') if event_link else None
+            dates_text = first_cell.get_text(strip=True)
             
             # Second column: dates and requirements
             second_cell = cells[1]
-            dates_text = second_cell.get_text(strip=True)
+            event_link = second_cell.find('a')
+            event_name = event_link.get_text(strip=True) if event_link else second_cell.get_text(strip=True)
             
             # Extract dates using regex
-            date_pattern = r'(\w+ \d+, \d+)\s*-\s*(\w+ \d+, \d+|Permanent)'
+            date_pattern = r'(\d{1,2}/\d{1,2}|\d{2}/\d{2}/\d{2})\s*-\s*(\d{1,2}/\d{1,2}|\w+\s+\d{1,2},\s+\d{4}|\w+\s+end\s+of\s+\d{1,2}\.\d{1,2})'
             date_match = re.search(date_pattern, dates_text)
             
             if date_match:
@@ -53,25 +52,21 @@ def scrape_events():
                 end_date_str = date_match.group(2)
                 
                 # Convert start date to timestamp
-                start_date = datetime.strptime(start_date_str, '%B %d, %Y')
+                start_date_year = datetime.now().year + (1 if datetime.strptime(start_date_str, '%m/%d').month < datetime.now().month else 0)
+                start_date = datetime.strptime(f'{start_date_str}/{start_date_year}', '%m/%d/%Y')
                 start_timestamp = int(start_date.timestamp())
                 
                 # Handle end date
-                if end_date_str == 'Permanent':
-                    continue
-                    end_timestamp = None
-                    end_date_display = 'Permanent'
-                else:
-                    end_date = datetime.strptime(end_date_str, '%B %d, %Y')
-                    end_timestamp = int(end_date.timestamp())
-                    end_date_display = end_date_str
+                end_date_year = datetime.now().year + (1 if datetime.strptime(end_date_str, '%m/%d').month < datetime.now().month else 0)
+                end_date = datetime.strptime(f'{end_date_str}/{end_date_year}', '%m/%d/%Y')
+                end_timestamp = int(end_date.timestamp())
+                end_date_display = end_date_str
                 
                 days_left = (end_date - datetime.now()).days
                 
                 result.append({
-                    'game': 'Wuthering Waves',
+                    'game': 'Star Rail',
                     'event_name': event_name,
-                    'event_url': event_url,
                     'dates_text': dates_text,
                     'start_timestamp': start_timestamp,
                     'start_date': start_date_str,
@@ -79,21 +74,18 @@ def scrape_events():
                     'end_date': end_date_display,
                     'days_left': days_left
                 })
-
-                
             else:
                 result.append({
-                    'game': 'Wuthering Waves',
+                    'game': 'Star Rail',
                     'event_name': event_name,
-                    'event_url': event_url,
                     'dates_text': f"Could not parse dates from: {dates_text}",
                     'days_left': None,
                 })
 
-    Log()('Finished scraping WuWa events from game8.')
+    Log()('Finished scraping Star Rail events from game8.')
     
     # write results into a file in root
-    with open('logs/events_wuwa.txt', 'w', encoding='utf-8') as file:
+    with open('logs/events_star_rail.txt', 'w', encoding='utf-8') as file:
         for element in result:
             file.write(str(element) + "\n")
 
