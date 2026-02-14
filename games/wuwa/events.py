@@ -27,6 +27,8 @@ def scrape_events():
     # Find all table rows (skip the header row)
     rows = ongoing_events_table.find_all('tr')[1:]  # Skip first row (header)
 
+    result = []
+
     for row in rows:
         # Get all cells in this row
         cells = row.find_all('td')
@@ -64,21 +66,37 @@ def scrape_events():
                     end_timestamp = int(end_date.timestamp())
                     end_date_display = end_date_str
                 
-                print(f"Event: {event_name}")
-                print(f"URL: {event_url}")
-                print(f"Plain content: {dates_text}")
-                print(f"Start: {start_timestamp} ({start_date_str})")
-                print(f"End: {end_timestamp} ({end_date_display})")
-                print("---")
+                days_left = (end_date - datetime.now()).days
+                
+                result.append({
+                    'event_name': event_name,
+                    'event_url': event_url,
+                    'dates_text': dates_text,
+                    'start_timestamp': start_timestamp,
+                    'start_date': start_date_str,
+                    'end_timestamp': end_timestamp,
+                    'end_date': end_date_display,
+                    'days_left': days_left
+                })
+
+                
             else:
-                print(f"Event: {event_name}")
-                print(f"URL: {event_url}")
-                print(f"Could not parse dates from: {dates_text}")
-                print("---")
+                result.append({
+                    'event_name': event_name,
+                    'event_url': event_url,
+                    'dates_text': f"Could not parse dates from: {dates_text}",
+                    'days_left': None,
+                })
 
     Log()('Finished scraping WuWa events from game8.')
     
-    # return result
+    # write results into a file in root
+    with open('events.txt', 'w', encoding='utf-8') as file:
+        for element in result:
+            file.write(str(element) + "\n")
+    
+    # Return the entry with the least number of days left
+    return min(result, key=lambda entry: entry.get('days_left', float('inf')))
 
 if __name__ == "__main__":
     scrape_events()

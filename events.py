@@ -1,9 +1,10 @@
 import random
 import time
+import subprocess
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-import games.wuwa.codes as wuwa_codes
+import games.wuwa.events as wuwa_events
 import database.database as db
 from helpers.time_delay import calculate_delay
 from helpers.log import Log
@@ -12,21 +13,28 @@ def start_api():
     pass
 
 def run_scrapers():
-    wuwa_codes.scrape_codes()
+    return wuwa_events.scrape_events()
 
 if __name__ == "__main__":
-    load_dotenv()
+    # load_dotenv()
     
-    if not db.check_table_exists('events'):
-        db.migrate()
+    # if not db.check_table_exists('events'):
+    #     db.migrate()
 
     start_api()
 
-    while True:
-        run_scrapers()
+    result = []
+    result.append(run_scrapers())
+    # summerize days left per game
+    # save results in file per day, so if i want to ask again i dont have to request it (pseudo cache)
 
-        delay = calculate_delay()
-        next_execution_time = time.time() + delay
-        next_execution_time_formatted = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(next_execution_time))
-        Log()('Next execution: \033[1m' + next_execution_time_formatted + '\033[0m')
-        time.sleep(delay)
+    game_event_list = sorted(result, key=lambda x: x['days_left'])
+    game_event_list = [f'{game["event_name"]}: {game["days_left"]} days left ({game["end_date"]})' for game in game_event_list]
+        
+    subprocess.run([
+        'notify-send',
+        '-t', '10000',
+        '-a', 'Game Events Scraper',
+        'Game Events Scraper',
+        '\n'.join(game_event_list),
+    ])
