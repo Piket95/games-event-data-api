@@ -12,6 +12,7 @@ import games.endfield.events as endfield_events
 import database.database as db
 from helpers.time_delay import calculate_delay
 from helpers.log import Log
+from datetime import datetime
 
 def start_api():
     pass
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     # save results in file per day, so if i want to ask again i dont have to request it (pseudo cache)
 
     game_event_list = sorted(results, key=lambda x: x['days_left'])
-    game_event_list = [f'• [{game["game"]}] {game["event_name"]}: <b>{game["days_left"]} days left</b> ({game["end_date"]})' for game in game_event_list]
+    game_event_list = [f'• [{game["game"]}] {game["event_name"]}: <b>{game["days_left"]} days left</b> ({datetime.fromtimestamp(game["end_timestamp"]).strftime("%d. %b %Y")})' for game in game_event_list]
         
     subprocess.run([
         'notify-send',
