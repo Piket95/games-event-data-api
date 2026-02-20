@@ -89,7 +89,7 @@ def scrape_events():
                                 
                                 end_timestamp = int(end_date.timestamp())
                                 end_date_display = end_date_str
-                                days_left = (end_date - datetime.now()).days
+                                days_left = (end_date - datetime.now()).days + 1
                             
                             result.append({
                                 'game': 'Zenless Zone Zero',
