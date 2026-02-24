@@ -9,6 +9,7 @@ from datetime import datetime
 # from helpers.games import Game
 from config.environments import Environment
 from helpers.log import Log
+from classes.days_left_calculator import DaysLeftCalculator
 
 def scrape_events():
     """
@@ -62,7 +63,7 @@ def scrape_events():
                 end_timestamp = int(end_date.timestamp())
                 end_date_display = end_date_str
                 
-                days_left = (end_date - datetime.now()).days + 1
+                days_left = DaysLeftCalculator().calculate_days_left(end_date)
                 
                 result.append({
                     'game': 'Arknights Endfield',
@@ -88,6 +89,9 @@ def scrape_events():
     with open('logs/events_endfield.txt', 'w', encoding='utf-8') as file:
         for element in result:
             file.write(str(element) + "\n")
+    
+    # Filter out entries where days_left is None or the end date is already passed
+    result = DaysLeftCalculator().filter_events(result)
     
     # Return the entry with the least number of days left
     return min(result, key=lambda entry: entry.get('days_left', float('inf')))
