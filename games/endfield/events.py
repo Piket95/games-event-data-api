@@ -37,29 +37,40 @@ def scrape_events():
         if len(cells) >= 2:
             # First column: event name and link
             first_cell = cells[0]
-            dates_text = first_cell.get_text(strip=True)
+            event_link = first_cell.find('a')
+            event_name = event_link.get_text(strip=True) if event_link else first_cell.get_text(strip=True)
             
             # Second column: dates and requirements
             second_cell = cells[1]
-            event_link = second_cell.find('a')
-            event_name = event_link.get_text(strip=True) if event_link else second_cell.get_text(strip=True)
+            dates_text = second_cell.get_text(strip=True)
             
-            # Extract dates using regex
-            date_pattern = r'(\d{1,2}/\d{1,2}|\d{2}/\d{2}/\d{2})\s*-\s*(\d{1,2}/\d{1,2}|\w+\s+\d{1,2},\s+\d{4}|\w+\s+end\s+of\s+\d{1,2}\.\d{1,2})'
+            # Extract dates using regex - look for date pattern in the dates text
+            date_pattern = r'(\d{1,2}\/\d{1,2}\/\d{2,4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{2,4})'
             date_match = re.search(date_pattern, dates_text)
             
             if date_match:
                 start_date_str = date_match.group(1)
                 end_date_str = date_match.group(2)
                 
-                # Convert start date to timestamp
-                start_date_year = datetime.now().year + (1 if datetime.strptime(start_date_str, '%m/%d').month < datetime.now().month else 0)
-                start_date = datetime.strptime(f'{start_date_str}/{start_date_year}', '%m/%d/%Y')
+                # Clean up dates_text by removing everything after the second date
+                dates_clean = re.sub(r'(\d{1,2}\/\d{1,2}\/\d{2,4})\s*-\s*(\d{1,2}\/\d{1,2}\/\d{2,4}).*', r'\1 - \2', dates_text)
+                
+                # Convert start date to timestamp - handle 2-digit and 4-digit years
+                if '/' in start_date_str and len(start_date_str.split('/')[-1]) == 2:
+                    # Format: MM/DD/YY (2-digit year)
+                    start_date = datetime.strptime(start_date_str, '%m/%d/%y')
+                else:
+                    # Format: MM/DD/YYYY (4-digit year)
+                    start_date = datetime.strptime(start_date_str, '%m/%d/%Y')
                 start_timestamp = int(start_date.timestamp())
                 
                 # Handle end date
-                end_date_year = datetime.now().year + (1 if datetime.strptime(end_date_str, '%m/%d').month < datetime.now().month else 0)
-                end_date = datetime.strptime(f'{end_date_str}/{end_date_year}', '%m/%d/%Y')
+                if '/' in end_date_str and len(end_date_str.split('/')[-1]) == 2:
+                    # Format: MM/DD/YY (2-digit year)
+                    end_date = datetime.strptime(end_date_str, '%m/%d/%y')
+                else:
+                    # Format: MM/DD/YYYY (4-digit year)
+                    end_date = datetime.strptime(end_date_str, '%m/%d/%Y')
                 end_timestamp = int(end_date.timestamp())
                 end_date_display = end_date_str
                 
@@ -68,7 +79,7 @@ def scrape_events():
                 result.append({
                     'game': 'Arknights Endfield',
                     'event_name': event_name,
-                    'dates_text': dates_text,
+                    'dates_text': dates_clean,
                     'start_timestamp': start_timestamp,
                     'start_date': start_date_str,
                     'end_timestamp': end_timestamp,
