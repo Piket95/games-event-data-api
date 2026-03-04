@@ -1,6 +1,8 @@
 import random
 import time
 import subprocess
+import os
+import json
 
 # from dotenv import load_dotenv
 
@@ -36,7 +38,15 @@ if __name__ == "__main__":
 
     start_api()
 
-    results = run_scrapers()
+    # Check if results file exists and if it has been run today
+    results_file = 'data/results.json'
+    if os.path.exists(results_file) and datetime.fromtimestamp(os.path.getmtime(results_file)).date() == datetime.now().date():
+        with open(results_file) as f:
+            results = json.load(f)
+    else:
+        results = run_scrapers()
+        with open(results_file, 'w') as f:
+            json.dump(results, f, indent=4)
     # summerize days left per game
     # save results in file per day, so if i want to ask again i dont have to request it (pseudo cache)
 
