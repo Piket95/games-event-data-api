@@ -40,6 +40,8 @@ if __name__ == "__main__":
 
     # Check if results file exists and if it has been run today
     results_file = 'data/results.json'
+
+    # if results file exists and has been run today (file modification timestamp check), load it instead of scraping again
     if os.path.exists(results_file) and datetime.fromtimestamp(os.path.getmtime(results_file)).date() == datetime.now().date():
         with open(results_file) as f:
             results = json.load(f)
@@ -52,7 +54,7 @@ if __name__ == "__main__":
 
     game_event_list = sorted(results, key=lambda x: x['days_left'])
     game_event_list = [f'• [{game["game"]}] {game["event_name"]}: <b>{game["days_left"]} days left</b> ({datetime.fromtimestamp(game["end_timestamp"]).strftime("%d. %b %Y")})' for game in game_event_list]
-        
+    
     subprocess.run([
         'notify-send',
         '-t', '-1',
