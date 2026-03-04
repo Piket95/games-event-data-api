@@ -1,5 +1,3 @@
-import random
-import time
 import subprocess
 import os
 import json
@@ -11,9 +9,9 @@ import games.genshin.events as genshin_events
 import games.star_rail.events as star_rail_events
 import games.zzz.events as zzz_events
 import games.endfield.events as endfield_events
-import database.database as db
-from helpers.time_delay import calculate_delay
-from helpers.log import Log
+# import database.database as db
+# from helpers.time_delay import calculate_delay
+# from helpers.log import Log
 from datetime import datetime
 
 def start_api():

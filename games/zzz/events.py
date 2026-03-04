@@ -1,13 +1,12 @@
 from bs4 import BeautifulSoup
 import requests
 # import mqtt
-import os
 import re
 from datetime import datetime
 
 # import database.database as db
 # from helpers.games import Game
-from config.environments import Environment
+# from config.environments import Environment
 from helpers.log import Log
 from classes.days_left_calculator import DaysLeftCalculator
 
