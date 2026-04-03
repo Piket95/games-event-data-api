@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 
-# Wait 3 minutes before running
-sleep 90
+if [ "$1" != "--instant" ]; then
+    # Wait 3 minutes before running
+    echo "Waiting 3 minutes before running..."
+    sleep 90
+fi
 
 # Get directory of this script
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+DIR="$( cd "$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )" >/dev/null 2>&1 && pwd )"
 
 cd $DIR
 
