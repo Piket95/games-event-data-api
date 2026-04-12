@@ -5,3 +5,4 @@ class Game(Enum):
     GENSHIN_IMPACT = 'gi'
     HONKAI_STAR_RAIL = 'hsr'
     ZENLESS_ZONE_ZERO = 'zzz'
+    ARKNIGHTS_ENDFIELD = 'ae'
