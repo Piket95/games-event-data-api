@@ -20,11 +20,35 @@ def start_api():
 def run_scrapers():
     results = []
 
-    results.append(wuwa_events.scrape_events())
-    results.append(genshin_events.scrape_events())
-    results.append(star_rail_events.scrape_events())
-    results.append(zzz_events.scrape_events())
-    results.append(endfield_events.scrape_events())
+    try:
+        results.append(wuwa_events.scrape_events())
+    except Exception as e:
+        print(f"Wuthering Waves: Data couldn't be fetched - {e}")
+        results.append({"game": "Wuthering Waves", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
+    
+    try:
+        results.append(genshin_events.scrape_events())
+    except Exception as e:
+        print(f"Genshin Impact: Data couldn't be fetched - {e}")
+        results.append({"game": "Genshin Impact", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
+    
+    try:
+        results.append(star_rail_events.scrape_events())
+    except Exception as e:
+        print(f"Honkai: Star Rail: Data couldn't be fetched - {e}")
+        results.append({"game": "Honkai: Star Rail", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
+    
+    try:
+        results.append(zzz_events.scrape_events())
+    except Exception as e:
+        print(f"Zenless Zone Zero: Data couldn't be fetched - {e}")
+        results.append({"game": "Zenless Zone Zero", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
+    
+    try:
+        results.append(endfield_events.scrape_events())
+    except Exception as e:
+        print(f"Endfield: Data couldn't be fetched - {e}")
+        results.append({"game": "Endfield", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
 
     return results
 
@@ -51,7 +75,7 @@ if __name__ == "__main__":
     # save results in file per day, so if i want to ask again i dont have to request it (pseudo cache)
 
     game_event_list = sorted(results, key=lambda x: x['days_left'])
-    game_event_list = [f'• [{game["game"]}] {game["event_name"]}: <b>{game["days_left"]} days left</b> ({datetime.fromtimestamp(game["end_timestamp"]).strftime("%d. %b %Y")})' for game in game_event_list]
+    game_event_list = [f'• [{game["game"]}] {game["event_name"]}' + (f': <b>{game["days_left"]} days left</b> ({datetime.fromtimestamp(game["end_timestamp"]).strftime("%d. %b %Y")})' if game["days_left"] > 0 else '') for game in game_event_list]
     
     subprocess.run([
         'notify-send',
