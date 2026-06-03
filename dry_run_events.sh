@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ "$1" != "--instant" ]; then
+if [ "$1" != "--instant" ] && [ "$1" != "--debug" ]; then
     # Wait 3 minutes before running
     echo "Waiting 3 minutes before running..."
     sleep 90
@@ -12,4 +12,4 @@ DIR="$( cd "$( dirname "$( readlink -f "${BASH_SOURCE[0]}" )" )" >/dev/null 2>&1
 cd $DIR
 
 source .venv/bin/activate
-python events.py
+python events.py $1

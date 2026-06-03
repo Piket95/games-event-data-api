@@ -1,6 +1,7 @@
 import subprocess
 import os
 import json
+import sys
 
 # from dotenv import load_dotenv
 
@@ -20,35 +21,24 @@ def start_api():
 def run_scrapers():
     results = []
 
-    try:
-        results.append(wuwa_events.scrape_events())
-    except Exception as e:
-        print(f"Wuthering Waves: Data couldn't be fetched - {e}")
-        results.append({"game": "Wuthering Waves", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
-    
-    try:
-        results.append(genshin_events.scrape_events())
-    except Exception as e:
-        print(f"Genshin Impact: Data couldn't be fetched - {e}")
-        results.append({"game": "Genshin Impact", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
-    
-    try:
-        results.append(star_rail_events.scrape_events())
-    except Exception as e:
-        print(f"Honkai: Star Rail: Data couldn't be fetched - {e}")
-        results.append({"game": "Honkai: Star Rail", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
-    
-    try:
-        results.append(zzz_events.scrape_events())
-    except Exception as e:
-        print(f"Zenless Zone Zero: Data couldn't be fetched - {e}")
-        results.append({"game": "Zenless Zone Zero", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
-    
-    try:
-        results.append(endfield_events.scrape_events())
-    except Exception as e:
-        print(f"Endfield: Data couldn't be fetched - {e}")
-        results.append({"game": "Endfield", "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
+    scraper_functions = [
+        (wuwa_events.scrape_events, "Wuthering Waves"),
+        (genshin_events.scrape_events, "Genshin Impact"),
+        (star_rail_events.scrape_events, "Honkai: Star Rail"),
+        (zzz_events.scrape_events, "Zenless Zone Zero"),
+        (endfield_events.scrape_events, "Endfield")
+    ]
+
+    if os.environ.get("ENVIRONMENT") == "DEBUG":
+        for scraper, game_name in scraper_functions:
+            results.append(scraper())
+    else:
+        for scraper, game_name in scraper_functions:
+            try:
+                results.append(scraper())
+            except Exception as e:
+                print(f"{game_name}: Data couldn't be fetched - {e}")
+                results.append({"game": game_name, "event_name": "Data couldn't be fetched", "days_left": 0, "end_timestamp": 0})
 
     return results
 
@@ -57,6 +47,12 @@ if __name__ == "__main__":
     
     # if not db.check_table_exists('events'):
     #     db.migrate()
+    
+    if len(sys.argv) > 1 and sys.argv[1] == "--debug":
+        print("Running in debug mode")
+        os.environ["ENVIRONMENT"] = "DEBUG"
+    else:
+        os.environ["ENVIRONMENT"] = "PROD"
 
     start_api()
 
@@ -64,7 +60,8 @@ if __name__ == "__main__":
     results_file = 'data/results.json'
 
     # if results file exists and has been run today (file modification timestamp check), load it instead of scraping again
-    if os.path.exists(results_file) and datetime.fromtimestamp(os.path.getmtime(results_file)).date() == datetime.now().date():
+    # but only if we aren't in debug mode
+    if os.path.exists(results_file) and datetime.fromtimestamp(os.path.getmtime(results_file)).date() == datetime.now().date() and os.environ.get("ENVIRONMENT") != "DEBUG":
         with open(results_file) as f:
             results = json.load(f)
     else:
