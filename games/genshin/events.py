@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-import requests
+# import requests
 # import mqtt
 import re
 from datetime import datetime
@@ -9,20 +9,34 @@ from datetime import datetime
 # from config.environments import Environment
 from helpers.log import Log
 from classes.days_left_calculator import DaysLeftCalculator
+from helpers.playwright import fetch_page_content_sync
 
-def scrape_events():
+def scrape_events(soup=None):
     """
     Scrape the Genshin events from the website.
+    
+    Args:
+        soup (BeautifulSoup, optional): Pre-fetched BeautifulSoup object. If None, will fetch the page.
     """
 
     Log()('Scraping Genshin events...')
-    Log()('Scraping website...')
-    url_to_scrape = "https://game8.co/games/Genshin-Impact/archives/301601"
+    
+    if soup is None:
+        Log()('Scraping website...')
+        url_to_scrape = "https://game8.co/games/Genshin-Impact/archives/301601"
+        # Use Playwright to fetch content for JavaScript-rendered pages
+        soup = fetch_page_content_sync(url_to_scrape, wait_time=5000)
 
-    response = requests.get(url_to_scrape)
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    ongoing_events_table = soup.find('h3', {'class': 'a-header--3', 'id': 'hm_1'}).find_next_sibling('table')
+    # Find the ongoing events table with error handling
+    header = soup.find('h3', {'class': 'a-header--3', 'id': 'hm_1'})
+    if not header:
+        Log()('Error: Could not find events header. HTML structure may have changed.')
+        return {"game": "Genshin Impact", "event_name": "Data couldn't be fetched - HTML structure changed", "days_left": 0, "end_timestamp": 0}
+    
+    ongoing_events_table = header.find_next_sibling('table')
+    if not ongoing_events_table:
+        Log()('Error: Could not find events table. HTML structure may have changed.')
+        return {"game": "Genshin Impact", "event_name": "Data couldn't be fetched - HTML structure changed", "days_left": 0, "end_timestamp": 0}
 
     # Find all table rows (skip the header row)
     rows = ongoing_events_table.find_all('tr')[1:]  # Skip first row (header)
